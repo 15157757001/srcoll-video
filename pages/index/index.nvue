@@ -1,0 +1,251 @@
+<template>
+	<div class="page">
+		<div class="custom"><div class="mask"></div></div>
+	    <div v-for="(item,idx) in videoList" :key="idx" class="video-box">
+			<div v-if="Math.abs(index-idx)<=3">
+				<!-- #ifdef APP-PLUS -->
+				<chunlei-video
+					ref="video"
+					class="video"
+					color="#c93756"
+					@clickDownload="clickDownload"
+					:title="item.title"
+					@fullscreenchange="fullscreenchange"
+					:srcList="item.src"
+					:gDuration="item.duration"
+					:initialTime="item.initialTime"
+				>
+				</chunlei-video>
+				<!-- #endif -->
+				<!-- #ifndef APP-PLUS -->
+				<chunleiVideoH5 class="video" ref="video" :src="item.src" :initialTime="item.initialTime"></chunleiVideoH5>  
+				<!-- #endif -->
+				<cover-view class="videoMask" v-if="playIndex!=idx"></cover-view>
+				<div class="bottom">
+					<text class="title">{{item.content}}</text>
+					<div class="content">
+						<div class="content-left">
+							<image class="avatar marginRight" :src="item.avatar"></image>
+							<text class="title">{{item.at}}</text>
+						</div>
+						<div class="content-right">
+							<text class="iconfont marginRight">&#xe635;</text>
+							<text class="iconfont">&#xe67e;</text><text class="text-sm marginRight">{{item.comment}}</text>
+							<text class="iconfont">&#xe603;</text><text class="text-sm marginRight">{{item.like}}</text>
+							<text class="iconfont">&#xe67f;</text>
+						</div>
+					</div>
+				</div> 
+				<div class="bottomMask" v-if="playIndex!=idx||timeMask"></div>
+			</div>
+	    </div>  
+	</div>
+</template>
+
+<script>
+	const videoBoxHeight = 290 //视频盒子高度
+	//#ifdef APP-PLUS
+	import chunleiVideo from '@/components/chunlei-video/chunlei-video';
+	//#endif
+	import chunleiVideoH5 from '@/components/chunlei-video-h5/chunlei-video-h5';
+	export default {
+		components:{
+			//#ifdef APP-PLUS
+			chunleiVideo,
+			//#endif
+			chunleiVideoH5
+		},
+		data() {
+			return {
+				playTop:200, //播放高度
+				index:0, //当前视频展示索引
+				timer:null,
+				playIndex:0,
+				timeMask:true,
+				
+				videoList:[
+					{
+						src:'https://dcloud-img.oss-cn-hangzhou.aliyuncs.com/guide/uniapp/%E7%AC%AC1%E8%AE%B2%EF%BC%88uni-app%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D%EF%BC%89-%20DCloud%E5%AE%98%E6%96%B9%E8%A7%86%E9%A2%91%E6%95%99%E7%A8%8B@20181126.mp4',
+						content:'为什么要选择uni-app？',
+						flag:false,
+						like:'10w',
+						comment:'1045',
+						avatar:'../../static/logo.png',
+						initialTime:0,
+						at:'Dcloud',
+						duration:841,
+					},
+					{
+						src:'http://baobab.kaiyanapp.com/api/v1/playUrl?vid=129764&resourceType=video&editionType=default&source=aliyun&playUrlType=url_oss',
+						content:'广告有反转：危机感十足！一辆车都比你靠谱22221222212222',
+						flag:false,
+						like:'7w',
+						comment:'1045',
+						avatar:'http://img.kaiyanapp.com/e44ed5fcfa424ba35761ce5f1339bc16.jpeg?imageMogr2/quality/60/format/jpg',
+						initialTime:0,
+						at:'欧美广告精选',
+						duration:149
+					},
+					{
+						src:'http://baobab.kaiyanapp.com/api/v1/playUrl?vid=164016&resourceType=video&editionType=default&source=aliyun&playUrlType=url_oss',
+						content:'无辣不欢，你没见过小龙虾的大场面',
+						flag:false,
+						like:'7w',
+						comment:'1045',
+						avatar:'http://img.kaiyanapp.com/7af2bb1bc134fb1115d48f05e9d317f0.jpeg?imageMogr2/quality/60/format/jpg',
+						initialTime:0,
+						at:'世界美食荟萃',
+						duration:1162
+					}
+				],
+				
+			}
+		},
+		beforeCreate() {
+			// #ifdef APP-PLUS-NVUE
+			var domModule = weex.requireModule('dom');
+			domModule.addRule('fontFace', {
+				'fontFamily': "texticons",
+				'src': "url('../../static/srcoll-video/text-icon.ttf')"
+			});
+			// #endif
+		},
+		onLoad() {
+
+		},
+		onPageScroll(e){
+			this.index = (e.scrollTop-44)/videoBoxHeight
+			this.debounce(()=>{
+				this.playIndex =Math.floor((e.scrollTop - 44 + this.playTop)/videoBoxHeight)
+			},300)()
+		},
+		methods: {
+			debounce(func, delay){
+			    return ()=>{
+					if(this.timer) clearTimeout(this.timer);
+					this.timer = setTimeout(()=>{
+				 		func()
+				    }, delay)
+				}
+			}
+		},
+		watch:{
+			index(newVal){
+				if(this.videoList.length-newVal<3){
+					this.videoList= [...this.videoList,...this.videoList]
+				}
+			},
+			playIndex(newVal){
+				
+				this.timeMask = false
+				setTimeout(()=> {this.timeMask = true}, 2000);
+			}
+		}
+	}
+</script>
+
+<style scoped>
+	/* #ifndef APP-PLUS-NVUE */
+	@font-face {font-family: "iconfont";
+	  src: url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAVYAAsAAAAACuQAAAUJAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDKgqJAIcyATYCJAMUCwwABCAFhG0HUxtBCREVpOmQ/SiMm+lFpUATRSwccTTf/nyRb+z7EA9fa+X73T17xBJI3a06xIBLrQtKQEskHGB5Ej46xgAqNmKG8LRLr9NlKJNRagf5IbZ+AsELOJuOtYw4YTpl44uf/nnu2n2/k8bjNEohJELy/x/++C8fOva1b99lvT/XrA3UiQIObI1NYVwAmBA1jF1a5vEEOo1pikPJmYWgXaEqA1ZdbWmqAe0Rk1JACu3aRsa2BcRjUGlPUzkXAI+c34//YD70gaTKQN1P63xSPdj9BZ+NhmP+P3QmTwAa6s4BeicymijE5UzXWdlLNWWdYmGxinbNkegqE/Rs9P8aY0dJlqJqxyLkylJ3f7wGUFXdkLCbLvyCBo/gV5BSUj0KGiSoHg0lF0VVWdt0Yoi4BsRHoGpmnPWyLknucfMQ8xEygAqkGRxF0e8Yp1iHwbHrp68F6fma4UjLSpcxwbtOuK6hLFVLRBsoEZKtAenhWjG+kpbg01mP7bcdFjHlsh2OiGEIBHEliZOr2QTtdpYllaud5AetaEokU4vluNH0teIlNyQOSlaKsWwRTUsoqpBgkLWAqIymbHez+HRJFpFhpCnJmDXT1o3BtPvOWXPMGkds2poxa6evH7suR1tItFIyCUHCNA/CZPhzoxSEQkOyt+uwsVpSuVLcoB5jWi9bQSjWkdhYYgViHhTK+qaLVwIXXhGNYObnjUKWlex0GS5fC1KXF8Ggcv0QXEVJltJBO097rGdttMvJzSyJK9ev2EOsI9AqRoqmUa5bbtgupKuUu11wmhbjHCQTIdEKKla1ZZ6FshXOikPWzMocQEMokOG0dcTy25IPCbz/vAQb65omAUHbUtkD/CG68bUhaYfQGXupWdbCjm+zv+Z4Xmus8rU/1I2SB9dzvtm1zKsaQ4Y6+yREp/mkbBrzvZ47IyawfGdarC0nPqA5YsQpb5MEQexBfo3udaFUr9RlUkCF5lSvvqHBRGvXoFKwu/M00Oy+9XZduOPHh/dlH/f7h7JDEyCB96Sx8XhaB2emtb3wJDmee0qW2sdLy0rGF3OpS1ADtfSlpXAxZC6w6/iNDogjGBd7waMwN98IM8csDM8jW0EBxTUh9jz5vDhXb85HM4w+mAlKMS0/gAqJ/CM8C5658c8gONaK27HLU6fy7eGosJW8F8yO/qlt3Q/crxa2TWnYQRuYyLicPPsKrlFiq3wGSRivNTGdl1QeHFxedd4Xs3uSRw7rHPF/tQiCKVuvg1f3RW6CenT+BycA9RF4CMYC9VX4F/oC9Yj8H479xpfzoXfOzyqTyK/t+A2e8+mPzXEnWI8ooDn6UFFl9EWjipOKJFXNVREGDbFQXrmji2/DoFOz8iXnGPS9G81IZfRVa0YCSNqMQtZuBlMITah0WYSGdjvQac7Rnbu4hIwlrHQAZr0BYHg+wGHsMEA8XwyX8AMdhD/o4kUGRBrCfeKc49IhwaBw+ILnBI3kkXSrO7jVF6x8L0xY6jAfaGwThSxO49kzjmi62MCGKneOgAwPUIKTYd8zKMMtShfXzqkiSSjriWLJw+wggYEEB72ApwloSGxE1uzOIfHzF6ji9QRTMFTkf0CG1cwfZGJpBcxZNVYaOpVGK6jkHEoQQHQlG4ASOVCvpRhQ2Uu1kOTE6gYJpZCg6aiqKh5eM5xj9E+NqO6/ihQ5SlTRoHdRsGrGajOkEWx0bofVXowkTmn6SNrOaTYDAAAA') format('woff2');
+	}
+	/* #endif*/
+	
+	.iconfont {
+		font-family: "iconfont" !important;
+		font-size: 16px;
+		font-style: normal;
+		color: #fff;
+	}
+	.text-sm{
+		font-size: 12px;
+		
+		color: #fff;
+	}
+	.marginRight{
+		margin-right: 10rpx;
+	}
+	.page{ 
+		/* #ifndef APP-PLUS */
+		display: flex;
+		/* #endif */
+		justify-content: flex-start;
+		flex-direction: column;
+		background-color: #000;
+	}
+	.custom{
+		height: 44px;
+		width: 750rpx;
+		background-color: #000;
+		position: relative;
+	}
+	.mask{
+		position: absolute;
+		height: 44px;
+		width: 750rpx;
+		background-color:  rgba(0,0,0,0.7);
+	}
+	.video-box{
+		position: relative;
+		height: 290px;
+		background-color: #000;
+	}
+	.video{
+		height: 200px;
+		width: 750rpx;
+	}
+	.videoMask{
+		position: absolute;
+		top: 0;
+		height: 200px;
+		width: 750rpx;
+		background-color:  rgba(0,0,0,0.7);
+	}
+	.bottom{
+		height: 70px;
+		/* #ifndef APP-PLUS */
+		display: flex;
+		/* #endif */
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 10px;
+	}
+	.bottomMask{
+		position: absolute;
+		bottom: 0;
+		height: 90px;
+		width: 750rpx;
+		background-color:  rgba(0,0,0,0.7);
+	}
+	.title{
+		font-size: 14px;
+		color: #fff;
+	}
+	.avatar{
+		height: 50rpx;
+		width: 50rpx;
+		border-radius: 25rpx;
+	}
+	.content{
+		/* #ifndef APP-PLUS */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.content-left{
+		/* #ifndef APP-PLUS */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+	.content-right{
+		/* #ifndef APP-PLUS */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+</style>
