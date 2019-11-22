@@ -1,7 +1,6 @@
 <template>
 	<view>
-		<video show-fullscreen-btn show-progress enable-progress-gesture
-			:direction="direction" :src="src" :loop="loop" @play="playing"
+		<video :direction="direction" :src="src" :loop="loop" @timeupdate="timeupdate"
 			id="chunleiVideo" ref="chunleiVideo" class="video">
 		</video>
 	</view>
@@ -32,17 +31,20 @@
 			
 		},
 		methods:{
+			timeupdate(event){
+				this.time = event.detail.currentTime
+			},
 			videoPlay(){
-				if(!this.play){
+				if(this.play){
 					this.videoCtx.play();
 					if(this.playFirst){
-						this.videoCtx.seek(this.initialTime)
+						this.videoCtx.seek(this.startTime)
 						this.playFirst = false
 					} 
 				}else{
 					this.videoCtx.pause();
+					this.$emit('pause',this.time)
 				}
-				this.play = !this.play
 			},
 			waiting(){
 				
@@ -52,6 +54,12 @@
 			play(newVal,oldVal){
 				this.videoPlay()
 			},
+			startTime:{
+				immediate: true,
+				handler(newVal,oldVal){
+					this.time = newVal
+				}
+			}
 		},
 		computed:{
 		}

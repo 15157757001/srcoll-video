@@ -4,7 +4,7 @@
 	    <div v-for="(item,idx) in videoList" :key="idx" class="video-box">
 			<div v-if="Math.abs(index-idx)<=3">
 				<!-- #ifdef APP-PLUS -->
-				<chunlei-video
+				<!-- <chunlei-video
 					ref="video"
 					class="video"
 					color="#c93756"
@@ -15,11 +15,12 @@
 					:gDuration="item.duration"
 					:initialTime="item.initialTime"
 				>
-				</chunlei-video>
+				</chunlei-video> -->
 				<!-- #endif -->
-				<!-- #ifndef APP-PLUS -->
-				<chunleiVideoH5 class="video" ref="video" :src="item.src" :initialTime="item.initialTime"></chunleiVideoH5>  
-				<!-- #endif -->
+				
+				<chunleiVideoH5 class="video" ref="video" :play="item.flag" @pause="pauseVideo($event,item)"
+					:src="item.src" :initialTime="item.initialTime"></chunleiVideoH5>  
+				
 				<cover-view class="videoMask" v-if="playIndex!=idx"></cover-view>
 				<div class="bottom">
 					<text class="title">{{item.content}}</text>
@@ -57,6 +58,7 @@
 		},
 		data() {
 			return {
+				listNumber:3, //剩余视频小于3时加载视频
 				playTop:200, //播放高度
 				index:0, //当前视频展示索引
 				timer:null,
@@ -77,7 +79,7 @@
 					},
 					{
 						src:'http://baobab.kaiyanapp.com/api/v1/playUrl?vid=129764&resourceType=video&editionType=default&source=aliyun&playUrlType=url_oss',
-						content:'广告有反转：危机感十足！一辆车都比你靠谱22221222212222',
+						content:'广告有反转：危机感十足！一辆车都比你靠谱',
 						flag:false,
 						like:'7w',
 						comment:'1045',
@@ -105,7 +107,7 @@
 			// #ifdef APP-PLUS-NVUE
 			var domModule = weex.requireModule('dom');
 			domModule.addRule('fontFace', {
-				'fontFamily': "texticons",
+				'fontFamily': "iconfont",
 				'src': "url('../../static/srcoll-video/text-icon.ttf')"
 			});
 			// #endif
@@ -120,6 +122,35 @@
 			},300)()
 		},
 		methods: {
+			pushVideoList(){
+				let promise = new Promise((resolve,reject)=>{
+					uni.request({
+						url: 'https://api.apiopen.top/videoRecommend?id=127397',
+						success: (res) => {
+							let videoGroup = []
+							for (let item of res.data.result) {
+								if(item.type == 'videoSmallCard'){
+									videoGroup.push({
+										src:item.data.playUrl,
+										content:item.data.title,
+										flag:false,
+										like:'7w',
+										comment:'1045',
+										at:item.data.author.name,
+										avater:item.data.author.icon,
+										initialTime:0,
+										duration:item.data.duration
+									})
+								}
+							}
+							this.videoList = [...this.videoList,...videoGroup]
+							resolve()
+						}
+					})
+				}) 
+				return promise
+			},
+			pauseVideo(val,item){item.initialTime = val},
 			debounce(func, delay){
 			    return ()=>{
 					if(this.timer) clearTimeout(this.timer);
@@ -130,15 +161,21 @@
 			}
 		},
 		watch:{
-			index(newVal){
-				if(this.videoList.length-newVal<3){
-					this.videoList= [...this.videoList,...this.videoList]
+			index:{
+				handler:async function(newVal){
+					if(this.videoList.length-newVal-1<this.listNumber){
+						await this.pushVideoList()
+					}
 				}
-			},
+			}
 			playIndex(newVal){
 				
 				this.timeMask = false
 				setTimeout(()=> {this.timeMask = true}, 2000);
+				for (let item of this.videoList) {
+					item.flag = false
+				}
+				this.videoList[newVal].flag = true
 			}
 		}
 	}
