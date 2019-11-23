@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<video :direction="direction" :src="src" :loop="loop" @timeupdate="timeupdate"
-			id="chunleiVideo" ref="chunleiVideo" class="video">
+			:id="`video_${src}`" ref="chunleiVideo" class="video" objectFit="fill">
 		</video>
 	</view>
 </template>
@@ -27,7 +27,7 @@
 			}
 		},
 		mounted() {
-			this.videoCtx = uni.createVideoContext(`chunleiVideo`,this)
+			this.videoCtx = uni.createVideoContext(`video_${this.src}`,this)
 			
 		},
 		methods:{
