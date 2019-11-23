@@ -3,8 +3,25 @@
 		<div class="custom"><div class="mask"></div></div>
 	    <div v-for="(item,idx) in videoList" :key="idx" class="video-box">
 			<div v-if="Math.abs(index-idx)<=3">
+				<!-- #ifdef APP-PLUS -->
+				<chunlei-video
+					ref="video"
+					class="video"
+					color="#5f2c82"
+					:flag="item.flag"
+					:title="item.title"
+					:srcList="item.src"
+					:gDuration="item.duration"
+					:initialTime="item.initialTime"
+					@pause="pauseVideo($event,item)"
+				>
+				</chunlei-video>
+				<!-- #endif -->
+				
+				<!-- #ifndef APP-PLUS -->
 				<chunleiVideoH5 class="video" ref="video" :play="item.flag" @pause="pauseVideo($event,item)"
 					:src="item.src" :initialTime="item.initialTime"></chunleiVideoH5> 
+				<!-- #endif -->
 				
 				<!-- #ifndef MP-WEIXIN -->
 				<cover-view class="videoMask" v-if="playIndex!=idx" @click.stop="playIndex=idx"></cover-view>
@@ -35,10 +52,16 @@
 
 <script>
 	const videoBoxHeight = 290 //视频盒子高度
-
+	
+	//#ifdef APP-PLUS
+	import chunleiVideo from '@/components/chunlei-video/chunlei-video';
+	//#endif
 	import chunleiVideoH5 from '@/components/chunlei-video-h5/chunlei-video-h5';
 	export default {
 		components:{
+			//#ifdef APP-PLUS
+			chunleiVideo,
+			//#endif
 			chunleiVideoH5
 		},
 		data() {

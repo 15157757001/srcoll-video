@@ -1,6 +1,6 @@
 {
     "name" : "sroll-video",
-    "appid" : "__UNI__E05A2E8",
+    "appid" : "",
     "description" : "",
     "versionName" : "1.0.0",
     "versionCode" : "100",
@@ -56,7 +56,7 @@
     "quickapp" : {},
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "wxa56b84bae8c9f006",
+        "appid" : "",
         "setting" : {
             "urlCheck" : false
         },
