@@ -105,10 +105,9 @@
 			//#endif
 		},
 		async mounted() {
+			this.videoList = [...this.videoList,...this.videoList]
+			this.playIndex = 0
 			await this.pushVideoList()
-			setTimeout(() =>{
-				this.playIndex = 0
-			}, 200);
 		},
 		onHide(){
 			for (let item of this.videoList) {
@@ -158,14 +157,25 @@
 				 		func()
 				    }, delay)
 				}
-			}
+			},
+			throttle(func, delay) {
+			    return ()=> {                          
+			        if (!this.timerThr) {                    
+			            this.timerThr = setTimeout(() => {                                              
+			                this.timerThr = null;                    
+			            }, delay);                
+			        }            
+			    }        
+			}   
 		},
 		watch:{
 			index:{
 				handler:async function(newVal){
-					if(this.videoList.length-newVal-1<this.listNumber){
-						await this.pushVideoList()
-					}
+					this.throttle(async()=>{
+						if(this.videoList.length-newVal-1<this.listNumber){
+							await this.pushVideoList()
+						}
+					},2000)()
 				}
 			},
 			playIndex(newVal){

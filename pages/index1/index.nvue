@@ -71,7 +71,8 @@
 				
 				
 				index:0, //当前视频展示索引
-				timer:null,
+				timerDeb:null,
+				timerThr:null,
 				playIndex:-1,
 				timeMask:true,
 				
@@ -128,10 +129,9 @@
 			//#endif
 		},
 		async mounted() {
+			this.videoList = [...this.videoList,...this.videoList]
+			this.playIndex = 0
 			await this.pushVideoList()
-			setTimeout(() =>{
-				this.playIndex = 0
-			}, 200);
 		},
 		onHide(){
 			for (let item of this.videoList) {
@@ -176,19 +176,32 @@
 			pauseVideo(val,item){item.initialTime = val},
 			debounce(func, delay){
 			    return ()=>{
-					if(this.timer) clearTimeout(this.timer);
-					this.timer = setTimeout(()=>{
+					if(this.timerDeb) clearTimeout(this.timerDeb);
+					this.timerDeb = setTimeout(()=>{
 				 		func()
 				    }, delay)
 				}
-			}
+			},
+			throttle(func, delay) {                     
+			    return ()=> {        
+			        if (!this.timerThr) {
+			            this.timerThr = setTimeout(() => {     
+							func()
+			                this.timerThr = null;                    
+			            }, delay);                
+			        }            
+			    }        
+			}    
 		},
 		watch:{
 			index:{
 				handler:async function(newVal){
-					if(this.videoList.length-newVal-1<this.listNumber){
-						await this.pushVideoList()
-					}
+					this.throttle(async()=>{
+						if(this.videoList.length-newVal-1<this.listNumber){
+							await this.pushVideoList()
+						}
+					},2000)()
+					
 				}
 			},
 			playIndex(newVal){
