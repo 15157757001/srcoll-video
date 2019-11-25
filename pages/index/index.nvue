@@ -105,7 +105,6 @@
 			//#endif
 		},
 		async mounted() {
-			this.videoList = [...this.videoList,...this.videoList]
 			this.playIndex = 0
 			await this.pushVideoList()
 		},
@@ -119,6 +118,13 @@
 			this.debounce(()=>{
 				this.playIndex =Math.floor((e.scrollTop - 44 + this.playTop)/videoBoxHeight)
 			},300)()
+		},
+		onReachBottom() {
+			this.throttle(()=>{
+				if(this.videoList.length-newVal-1<this.listNumber){
+					this.pushVideoList()
+				}
+			},200)()
 		},
 		methods: {
 			pushVideoList(){
@@ -159,23 +165,24 @@
 				}
 			},
 			throttle(func, delay) {
-			    return ()=> {                          
-			        if (!this.timerThr) {                    
-			            this.timerThr = setTimeout(() => {                                              
+			    return ()=> {        
+			        if (!this.timerThr) {
+						func()
+			            this.timerThr = setTimeout(() => {     
 			                this.timerThr = null;                    
 			            }, delay);                
 			        }            
 			    }        
-			}   
+			}    
 		},
 		watch:{
 			index:{
 				handler:async function(newVal){
-					this.throttle(async()=>{
+					this.throttle(()=>{
 						if(this.videoList.length-newVal-1<this.listNumber){
-							await this.pushVideoList()
+							this.pushVideoList()
 						}
-					},2000)()
+					},200)()
 				}
 			},
 			playIndex(newVal){
