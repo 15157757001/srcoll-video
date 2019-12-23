@@ -12,20 +12,22 @@
 					:title="item.title"
 					:srcList="item.src"
 					:gDuration="item.duration"
+					poster="../../static/logo.png"
 					:initialTime="item.initialTime"
 					@pause="pauseVideo($event,item)"
+					
 				>
 				</chunlei-video>
 				<!-- #endif -->
 				
 				<!-- #ifndef APP-PLUS -->
 				<chunleiVideoH5 class="video" ref="video" :play="item.flag" @pause="pauseVideo($event,item)"
-					:src="item.src" :initialTime="item.initialTime"></chunleiVideoH5> 
+					:src="item.src" poster="../../static/logo.png" :initialTime="item.initialTime"></chunleiVideoH5> 
 				<!-- #endif -->
 				
-				<!-- #ifndef MP-WEIXIN -->
-				<cover-view class="videoMask" v-if="playIndex!=idx" @click.stop="playIndex=idx"></cover-view>
-				<!-- #endif -->
+				
+				<cover-view class="videoMask" v-if="playIndex!=idx" @click.stop="clickMask(idx)"></cover-view>
+
 				
 				<div class="bottom">
 					<text class="title">{{item.content}}</text>
@@ -179,6 +181,7 @@
 				}) 
 				return promise
 			},
+			clickMask(idx){this.playIndex=idx},
 			pauseVideo(val,item){item.initialTime = val},
 			debounce(func, delay){
 			    return ()=>{

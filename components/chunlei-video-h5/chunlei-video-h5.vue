@@ -1,8 +1,9 @@
 <template>
-	<view>
+	<view class="box">
 		<video :direction="direction" :src="src" :loop="loop" @timeupdate="timeupdate"
 			:id="`video_${src}`" ref="chunleiVideo" class="video" objectFit="fill">
 		</video>
+		<cover-image class="img" :src="poster" v-if="poster!=''&&playFirst"></cover-image>
 	</view>
 </template>
 
@@ -16,6 +17,10 @@
 			play:{
 				type:Boolean,
 				default:false
+			},
+			poster:{ //视频封面的图片
+				type:String,
+				default:''
 			}
 		},
 		data(){
@@ -67,7 +72,15 @@
 </script>
 
 <style scoped>
+	.box{
+		position: relative;
+	}
 	.video{
+		height: 200px;
+		width: 750rpx;
+	}
+	.img{
+		position: absolute;
 		height: 200px;
 		width: 750rpx;
 	}

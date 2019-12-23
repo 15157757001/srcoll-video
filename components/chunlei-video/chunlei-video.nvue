@@ -5,7 +5,8 @@
 			 @fullscreenchange="changeScreen" @timeupdate="timeupdate" @ended="ended" @waiting="waiting" @play="playing"
 			id="chunleiVideo" ref="chunleiVideo" class="video">
 			<cover-view  class="video-view" v-if="!fullScreen" :style="{ width: `750rpx`,height: `200px` }">
-				<div class="move-view" @touchend="videoTouchEnd" @touchmove="videoTouchMove" @touchstart="videoTouchStart" :style="{ width: `200px`,height: `750rpx` }"></div>
+				<div class="move-view" @touchend="videoTouchEnd" @touchmove="videoTouchMove" @touchstart="videoTouchStart" :style="{ width: `750rpx`,height: `200px` }"></div>
+				<image class="video-view" :style="{ width: `750rpx`,height: `200px` }" :src="poster" v-if="poster!=''&&playFirst"></image>
 				<div class="controls-view" v-if="showControls" @click.stop="">
 					<div @click="videoPlay" v-if="play" class="btnBox"><text class="ios-icon">&#xe601;</text></div>
 					<div @click="videoPlay" v-if="!play" class="btnBox"><text class="ios-icon">&#xe896;</text></div>
@@ -280,7 +281,10 @@
 				type:Boolean,
 				default:false
 			},
-			
+			poster:{ //视频封面的图片
+				type:String,
+				default:''
+			}
 		},
 		data(){
 			return{
@@ -614,35 +618,44 @@
 					//全屏下支持音量和亮度
 					
 					if(this.fullScreen&&!this.touchType&&this.platform=='android'){
-						//#ifdef APP-PLUS-NVUE
+					
 						this.touchType = Math.abs( newTouces.pageY - oldTouces.pageY ) > 20 && newTouces.pageX<=200 ? 'bright' : this.touchType
-						//#endif
-						//#ifndef H5
+						
 						this.touchType = Math.abs( newTouces.pageY - oldTouces.pageY ) > 20 && newTouces.pageX>200 ? 'volume' : this.touchType
-						//#endif
+						
 					}
 					if(this.fullScreen&&this.platform=='ios'){
-						this.touchType = Math.abs( newTouces.pageY - oldTouces.pageY ) > 20 ? 'current' : null
+						this.touchType = Math.abs( newTouces.pageX - oldTouces.pageX ) > 20 ? 'bright' : null
+						
+						if(!this.touchType){
+							this.touchType = Math.abs( newTouces.pageY - oldTouces.pageY ) > 20 ? 'current' : this.touchType
+						}
+						
 					}
 					
-				}else if(this.touchType=='volume'){
+				}else if(this.touchType=='volume'&&this.platform=='android'){
 					this.touchVolume = ( oldTouces.pageY - newTouces.pageY)/200*1*2 + this.oldValue[touchType]
 					this.touchVolume = this.touchVolume > 1? 1 : this.touchVolume
 					this.touchVolume = this.touchVolume < 0? 0 : this.touchVolume
-					
-				}else if(this.touchType=='bright'){
+					//相等时重置oldTouces
+					if(this.touchVolume==this.oldValue[touchType]) this.oldTouces = newTouces
+				}else if(this.touchType=='bright'&&this.platform=='android'){
 					this.touchBright = ( oldTouces.pageY - newTouces.pageY)/200*1*2 + this.oldValue[touchType]
 					this.touchBright = this.touchBright > 1? 1 : this.touchBright
 					this.touchBright = this.touchBright < 0? 0 : this.touchBright
+					//相等时重置oldTouces
+					if(this.touchBright==this.oldValue[touchType]) this.oldTouces = newTouces
 				}else if(this.touchType=='current'){
 					
-					this.touchCurrent = (newTouces.pageX - oldTouces.pageX)/250*this.duration*2 + this.oldValue[touchType]*1
+					this.touchCurrent = (newTouces.pageX - oldTouces.pageX)*this.duration/250/this.currentSen + this.oldValue[touchType]*1
 					if(this.platform=='ios'&&this.fullScreen){
-						this.touchCurrent = (newTouces.pageY - oldTouces.pageY)/250*this.duration*2 + this.oldValue[touchType]*1
+						this.touchCurrent = this.direction/-90*(newTouces.pageY - oldTouces.pageY)*this.duration/250/this.currentSen + this.oldValue[touchType]*1
 					}
 					
 					this.touchCurrent = this.touchCurrent > this.duration? this.duration : this.touchCurrent
 					this.touchCurrent = this.touchCurrent < 0? 0 : this.touchCurrent
+					//相等时重置oldTouces
+					if(this.touchCurrent==this.oldValue[touchType]) this.oldTouces = newTouces
 				}
 				
 			},

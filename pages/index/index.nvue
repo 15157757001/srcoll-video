@@ -4,11 +4,11 @@
 	    <div v-for="(item,idx) in videoList" :key="idx" class="video-box">
 			<div v-if="Math.abs(index-idx)<=3">
 				<chunleiVideoH5 class="video" ref="video" :play="item.flag" @pause="pauseVideo($event,item)"
-					:src="item.src" :initialTime="item.initialTime"></chunleiVideoH5> 
+					:src="item.src" poster="../../static/logo.png" :initialTime="item.initialTime"></chunleiVideoH5> 
+
 				
-				<!-- #ifndef MP-WEIXIN -->
-				<cover-view class="videoMask" v-if="playIndex!=idx" @click.stop="playIndex=idx"></cover-view>
-				<!-- #endif -->
+				<cover-view class="videoMask" v-if="playIndex!=idx" @click.stop="clickMask(idx)"></cover-view>
+				
 				
 				<div class="bottom">
 					<text class="title">{{item.content}}</text>
@@ -155,6 +155,7 @@
 				}) 
 				return promise
 			},
+			clickMask(idx){this.playIndex=idx},
 			pauseVideo(val,item){item.initialTime = val},
 			debounce(func, delay){
 			    return ()=>{
